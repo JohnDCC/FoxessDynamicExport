@@ -1,0 +1,2 @@
+shell_command:
+  foxess_set_export_limit: "python3 /config/foxess_test.py {{ export_watts }}"
