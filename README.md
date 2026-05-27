@@ -2,6 +2,6 @@ This automation will dynamically adjust your output between 6pm and 9pm to work 
 
 1. Add Configuration to your config file
 2. Add python file to your root folder
-3. Add your API and Serial number into the python file
+3. Add your API (FoxCloud) and Serial Number into the python file
 4. Add the automations
 5. Adjust times, target SOC and max watts as desired
