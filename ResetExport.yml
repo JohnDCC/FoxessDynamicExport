@@ -1,0 +1,9 @@
+alias: "Custom: Reset Export Limit (9:01 PM)"
+description: Resets the inverter export limit to max after the force discharge.
+triggers:
+  - trigger: time
+    at: "21:01:00"
+actions:
+  - action: shell_command.foxess_set_export_limit
+    data:
+      export_watts: 5000
