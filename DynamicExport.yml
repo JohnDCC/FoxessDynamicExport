@@ -1,0 +1,36 @@
+alias: "Custom: Dynamic Export Throttle (6PM - 9PM)"
+description: >-
+  Starts slow to prioritize house load, then ramps up export to 5kW at 7:30 PM
+  based on spare SoC. Drops to safe minimum if SoC hits the defined cutoff
+  variable.
+triggers:
+  - trigger: state
+    entity_id: sensor.foxess_battery_soc
+  - trigger: time
+    at: "19:30:00"
+conditions:
+  - condition: time
+    after: "18:00:00"
+    before: "21:00:00"
+actions:
+  - action: shell_command.foxess_set_export_limit
+    data:
+      export_watts: >-
+        {# --- CONFIGURATION VARIABLES --- #} {# Fetch the cutoff from your new
+        dashboard slider #} {% set soc_cut =
+        states('input_number.foxess_soc_cutoff') | float(60) %} {% set
+        max_export = 3000 %}
+
+        {# --- LIVE SYSTEM DATA --- #} {% set soc =
+        states('sensor.foxess_battery_soc') | float(0) %} {% set current_time =
+        now().strftime('%H:%M') %}
+
+        {# --- RUNTIME LOGIC --- #} {% if soc <= soc_cut %}
+          100
+        {% elif current_time < "19:30" %}
+          850
+        {% else %}
+          {% set calculated = ((soc - soc_cut) / (100 - soc_cut)) * max_export %}
+          {{ [calculated, max_export] | min | max(100) | int }}
+        {% endif %}
+mode: restart
