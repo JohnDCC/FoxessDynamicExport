@@ -2,6 +2,7 @@ This automation will dynamically adjust your output between 6pm and 9pm to work 
 
 Requirements:
 - Pyscript
+- Foxess HA or Foxess-control (recommended)
 
 1. Add Configuration to your config file
 2. Add python file to your root folder
