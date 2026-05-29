@@ -4,6 +4,7 @@ Requirements:
 - Pyscript
 - Foxess HA or Foxess-control (recommended)
 
+Setup:
 1. Add Configuration to your config file
 2. Add python file to your root folder
 3. Add your API (FoxCloud) and Serial Number into the python file
