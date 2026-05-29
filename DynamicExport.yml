@@ -2,10 +2,10 @@ alias: "Custom: Dynamic Export Throttle (6PM - 9PM)"
 description: >-
   Starts slow to prioritize house load, then ramps up export to 5kW at 7:30 PM
   based on spare SoC. Drops to safe minimum if SoC hits the defined cutoff
-  variable.
+  variable. Tracks the calculated target in a dashboard helper.
 triggers:
-  - trigger: state
-    entity_id: sensor.foxess_battery_soc
+  - trigger: time
+    at: "18:00:00"
   - trigger: time
     at: "19:30:00"
 conditions:
@@ -13,24 +13,27 @@ conditions:
     after: "18:00:00"
     before: "21:00:00"
 actions:
-  - action: shell_command.foxess_set_export_limit
-    data:
-      export_watts: >-
-        {# --- CONFIGURATION VARIABLES --- #} {# Fetch the cutoff from your new
-        dashboard slider #} {% set soc_cut =
-        states('input_number.foxess_soc_cutoff') | float(60) %} {% set
-        max_export = 3000 %}
-
-        {# --- LIVE SYSTEM DATA --- #} {% set soc =
-        states('sensor.foxess_battery_soc') | float(0) %} {% set current_time =
+  - variables:
+      calculated_export: >-
+        {% set battery_kw = 42 %}
+        {% set soc_cut = 60 %}
+        {% set max_export = 3000 %}  {% set soc =
+        states('sensor.foxess_battery_soc') | float(0) %}  {% set current_time =
         now().strftime('%H:%M') %}
 
-        {# --- RUNTIME LOGIC --- #} {% if soc <= soc_cut %}
-          100
-        {% elif current_time < "19:30" %}
+        {% if current_time < "19:30:00" %}
           850
         {% else %}
-          {% set calculated = ((soc - soc_cut) / (100 - soc_cut)) * max_export %}
-          {{ [calculated, max_export] | min | max(100) | int }}
+          {% set calculated = (((soc - soc_cut)/100)*battery_kw)/1.5*1000 %}
+          {# This safely ensures the number stays between 100 and max_export #}
+          {{ [ [calculated, max_export] | min, 850 ] | max | int }}
         {% endif %}
+  - action: input_number.set_value
+    target:
+      entity_id: input_number.foxess_target_export_limit
+    data:
+      value: "{{ calculated_export }}"
+  - action: shell_command.foxess_set_export_limit
+    data:
+      export_watts: "{{ calculated_export }}"
 mode: restart
