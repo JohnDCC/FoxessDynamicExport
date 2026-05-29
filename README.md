@@ -9,4 +9,4 @@ Setup:
 2. Add python file to your root folder
 3. Add your API (FoxCloud) and Serial Number into the python file
 4. Add the automations
-5. Adjust times, target SOC and max watts as desired
+5. Adjust times, target SOC, battery size and max watts as desired
